@@ -6,7 +6,7 @@ public class NeoMUD
 {
   public static void Main()
   {
-    List<string> RunningThreadList = new();
+    List<string> RunningThreadList = [];
     DateTime startupTime = DateTime.Now;
     CancellationTokenSource cts = new();
 
@@ -26,7 +26,7 @@ public class NeoMUD
     serverTickHandler.Start();
 
     // Add handler for graceful shutdown on Ctrl-C
-    Console.CancelKeyPress += (object? sender, ConsoleCancelEventArgs e) =>
+    Console.CancelKeyPress += (sender, e) =>
     {
       e.Cancel = true;
       InitiateShutdown(cts, ref RunningThreadList);
@@ -35,7 +35,7 @@ public class NeoMUD
 
   public static void DisplayStartupSplash(DateTime startTime)
   {
-    String startupTimeString21 = startTime.ToString("yyyy-MM-dd HH:mm:ss  ");
+    var startupTimeString21 = startTime.ToString("yyyy-MM-dd HH:mm:ss  ");
     Console.WriteLine($"""
 ===============================================================================
                              NeoMUD 0.0.1 Alpha
@@ -53,7 +53,7 @@ Starting At:                                                  Stop server with:
     {
       // do nothing
     }
-    String stoppedTimeString21 = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss  ");
+    var stoppedTimeString21 = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss  ");
     Console.WriteLine($"""
 ===============================================================================
                             NeoMUD shutting down
