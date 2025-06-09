@@ -1,40 +1,39 @@
 ﻿using Serilog;
 
-namespace NeoMUD;
+namespace NeoMUD.src;
 
-public class NeoMUD
-{
-  public static void Main()
-  {
+public class NeoMUD {
+  public static void Main() {
     List<string> RunningThreadList = [];
     DateTime startupTime = DateTime.Now;
     CancellationTokenSource cts = new();
 
     // initialize background services
-    Log.Logger = new LoggerConfiguration()
-      .MinimumLevel.Debug()
-      .WriteTo.Console()
-      .WriteTo.File("logs/debug.log", rollingInterval: RollingInterval.Hour)
-      .WriteTo.SQLite("data.db", storeTimestampInUtc: true)
-      .CreateLogger();
+    Log.Logger =
+        new LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .WriteTo.Console()
+            .WriteTo
+            .File("logs/debug.log", rollingInterval: RollingInterval.Hour)
+            .WriteTo.SQLite("data.db", storeTimestampInUtc: true)
+            .CreateLogger();
 
     DisplayStartupSplash(startupTime);
 
     // Spin up background threads
-    Thread serverTickHandler = new(() => TickServer(cts.Token, ref RunningThreadList));
+    Thread serverTickHandler =
+        new(() => TickServer(cts.Token, ref RunningThreadList));
 
     serverTickHandler.Start();
 
     // Add handler for graceful shutdown on Ctrl-C
-    Console.CancelKeyPress += (sender, e) =>
-    {
+    Console.CancelKeyPress += (sender, e) => {
       e.Cancel = true;
       InitiateShutdown(cts, ref RunningThreadList);
     };
   }
 
-  public static void DisplayStartupSplash(DateTime startTime)
-  {
+  public static void DisplayStartupSplash(DateTime startTime) {
     var startupTimeString21 = startTime.ToString("yyyy-MM-dd HH:mm:ss  ");
     Console.WriteLine($"""
 ===============================================================================
@@ -46,11 +45,9 @@ Starting At:                                                  Stop server with:
   }
 
   public static void InitiateShutdown(CancellationTokenSource cts,
-      ref List<string> runningThreadList)
-  {
+                                      ref List<string> runningThreadList) {
     cts.Cancel();
-    while (runningThreadList.Count > 0)
-    {
+    while (runningThreadList.Count > 0) {
       // do nothing
     }
     var stoppedTimeString21 = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss  ");
@@ -63,12 +60,11 @@ Stopping At:                                                 Graceful Shutdown:
 """);
   }
 
-  public static void TickServer(CancellationToken ct, ref List<string> runningThreadList)
-  {
+  public static void TickServer(CancellationToken ct,
+                                ref List<string> runningThreadList) {
     runningThreadList.Add("TickServer");
     Log.Information("Started server tick thread");
-    while (!ct.IsCancellationRequested)
-    {
+    while (!ct.IsCancellationRequested) {
       // do server ticking logic here
     }
 
@@ -76,5 +72,4 @@ Stopping At:                                                 Graceful Shutdown:
     Log.Information("Stopping server tick thread...");
     runningThreadList.Remove("TickServer");
   }
-
 }

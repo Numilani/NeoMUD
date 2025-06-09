@@ -4,9 +4,9 @@ using shortid;
 using shortid.Configuration;
 
 [Table("Interactables")]
-public class Interactable{
+public class Interactable {
 
   [Key]
-  public string Id {get; set;} = ShortId.Generate(new GenerationOptions(useSpecialCharacters: false));
+  public string Id { get; set; } =
+      ShortId.Generate(new GenerationOptions(useSpecialCharacters: false));
 }
-
