@@ -1,12 +1,37 @@
 ﻿using Serilog;
+using Quartz;
+using Microsoft.Extensions.Hosting;
 
 namespace NeoMUD.src;
 
-public class NeoMUD {
-  public static void Main() {
-    List<string> RunningThreadList = [];
+public class NeoMUD
+{
+  public static async Task Main()
+  {
     DateTime startupTime = DateTime.Now;
     CancellationTokenSource cts = new();
+
+    var builder = Host.CreateDefaultBuilder();
+
+    builder.UseSerilog((ctx, services, config) =>
+    {
+      config.ReadFrom.Configuration(ctx.Configuration);
+    });
+
+    builder.ConfigureServices((hostContext, services) =>
+    {
+      services.AddQuartz(q => {
+          // add jobs here
+          });
+      services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+    });
+
+    var host = builder.Build();
+
+    await host.RunAsync();
+
+
+    List<string> RunningThreadList = [];
 
     // initialize background services
     Log.Logger =
@@ -18,7 +43,7 @@ public class NeoMUD {
             .WriteTo.SQLite("data.db", storeTimestampInUtc: true)
             .CreateLogger();
 
-    DisplayStartupSplash(startupTime);
+    // DisplayStartupSplash(startupTime);
 
     // Spin up background threads
     Thread serverTickHandler =
@@ -27,44 +52,19 @@ public class NeoMUD {
     serverTickHandler.Start();
 
     // Add handler for graceful shutdown on Ctrl-C
-    Console.CancelKeyPress += (sender, e) => {
+    Console.CancelKeyPress += (sender, e) =>
+    {
       e.Cancel = true;
-      InitiateShutdown(cts, ref RunningThreadList);
+      // InitiateShutdown(cts, ref RunningThreadList);
     };
   }
-
-  public static void DisplayStartupSplash(DateTime startTime) {
-    var startupTimeString21 = startTime.ToString("yyyy-MM-dd HH:mm:ss  ");
-    Console.WriteLine($"""
-===============================================================================
-                             NeoMUD 0.0.1 Alpha
-Starting At:                                                  Stop server with:
-{startupTimeString21}                                                   CTRL-C
-===============================================================================
-""");
-  }
-
-  public static void InitiateShutdown(CancellationTokenSource cts,
-                                      ref List<string> runningThreadList) {
-    cts.Cancel();
-    while (runningThreadList.Count > 0) {
-      // do nothing
-    }
-    var stoppedTimeString21 = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss  ");
-    Console.WriteLine($"""
-===============================================================================
-                            NeoMUD shutting down
-Stopping At:                                                 Graceful Shutdown:
-{stoppedTimeString21}                                               SUCCESSFUL
-===============================================================================
-""");
-  }
-
   public static void TickServer(CancellationToken ct,
-                                ref List<string> runningThreadList) {
+                                ref List<string> runningThreadList)
+  {
     runningThreadList.Add("TickServer");
     Log.Information("Started server tick thread");
-    while (!ct.IsCancellationRequested) {
+    while (!ct.IsCancellationRequested)
+    {
       // do server ticking logic here
     }
 
