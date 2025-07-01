@@ -1,6 +1,11 @@
 ﻿using Serilog;
 using Quartz;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using SuperSocket.Server.Host;
+using SuperSocket.ProtoBase;
+using System.Text;
+using SuperSocket.Server.Abstractions;
 
 namespace NeoMUD.src;
 
@@ -11,53 +16,125 @@ public class NeoMUD
     DateTime startupTime = DateTime.Now;
     CancellationTokenSource cts = new();
 
-    var builder = Host.CreateDefaultBuilder();
+    var builder = SuperSocketHostBuilder.Create<StringPackageInfo, CommandLinePipelineFilter>();
 
-    builder.UseSerilog((ctx, services, config) =>
-    {
-      config.ReadFrom.Configuration(ctx.Configuration);
-    });
-
-    builder.ConfigureServices((hostContext, services) =>
-    {
-      services.AddQuartz(q => {
-          // add jobs here
-          });
-      services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
-    });
-
-    var host = builder.Build();
-
-    await host.RunAsync();
-
-
-    List<string> RunningThreadList = [];
-
-    // initialize background services
-    Log.Logger =
-        new LoggerConfiguration()
+    Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Debug()
-            .WriteTo.Console()
-            .WriteTo
-            .File("logs/debug.log", rollingInterval: RollingInterval.Hour)
+            .WriteTo.Console(restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning)
+            .WriteTo.File("logs/debug.log", rollingInterval: RollingInterval.Hour)
             .WriteTo.SQLite("data.db", storeTimestampInUtc: true)
             .CreateLogger();
 
-    // DisplayStartupSplash(startupTime);
+    builder.UseSerilog(Log.Logger);
 
-    // Spin up background threads
-    Thread serverTickHandler =
-        new(() => TickServer(cts.Token, ref RunningThreadList));
-
-    serverTickHandler.Start();
-
-    // Add handler for graceful shutdown on Ctrl-C
-    Console.CancelKeyPress += (sender, e) =>
+    builder.ConfigureServices((hostContext, services) =>
     {
-      e.Cancel = true;
-      // InitiateShutdown(cts, ref RunningThreadList);
-    };
+      services.AddQuartz(q =>
+      {
+        DoJobSetup(q);
+      });
+      services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+    });
+    
+    builder.UseSessionHandler(async (s) => 
+        {
+          await s.SendAsync(Encoding.UTF8.GetBytes(ConnectionSplash() + "\r\n"));
+        },
+        async (s,e) => 
+        {
+          // do nothing
+        });
+    builder.UsePackageHandler(async (session, package) => {
+      var result = "";
+
+        switch (package.Key.ToUpper()){
+        case "PING":
+          result = "PONG";
+          break;
+        default:
+          result = "UNK";
+          break;
+        }
+
+      await session.SendAsync(Encoding.UTF8.GetBytes(result + "\r\n"));
+      });
+
+    builder.ConfigureSuperSocket(opts => {
+        opts.Name = "NeoMUD alpha1 (telnet-test)";
+        opts.Listeners = new List<ListenOptions>{new ListenOptions{Ip = "Any", Port = 4040}};
+        });
+
+    var host = builder.Build();
+
+    var lifetime = host.Services.GetRequiredService<IHostApplicationLifetime>();
+    lifetime.ApplicationStarted.Register(ShowStartupSplash);
+    lifetime.ApplicationStopped.Register(ShowExitSplash);
+
+
+    await host.RunAsync();
+
   }
+
+  public static void ShowStartupSplash()
+  {
+    var startupTimeString21 = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss  ");
+    Console.WriteLine($"""
+===============================================================================
+                             NeoMUD 0.0.1 Alpha
+Starting At:                                                  Stop server with:
+{startupTimeString21}                                                   CTRL-C
+===============================================================================
+""");
+  }
+
+  public static void ShowExitSplash()
+  {
+    var stoppedTimeString21 = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss  ");
+    Console.WriteLine($"""
+===============================================================================
+                            NeoMUD shutting down
+Stopping At:                                                 Graceful Shutdown:
+{stoppedTimeString21}                                               SUCCESSFUL
+===============================================================================
+""");
+  }
+
+  public static string ConnectionSplash(){
+    return $"""
+###############################################################################
+###############################################################################
+###  ######  ####          #####        #######################################
+###   #####  ####  ############  ######  ######################################
+###    ####  ####  ############  ######  ######################################
+###  #  ###  ####  ############  ######  ######################################
+###  ##  ##  ####       #######  ######  ######################################
+###  ###  #  ####  ############  ######  ######################################
+###  ####    ####  ############  ######  ######################################
+###  ######  ####          #####        #######################################
+###############################################################################
+###############################################################################
+#####################################  #######  ####  ######  ####         ####
+#####################################   #####   ####  ######  ####  #####   ###
+#####################################    ###    ####  ######  ####  ######  ###
+#####################################  #  #  #  ####  ######  ####  ######  ###
+#####################################  ##   ##  ####  ######  ####  ######  ###
+#####################################  #######  ####  ######  ####  ######  ###
+#####################################  #######  #####  ####  #####  #####   ###
+#####################################  #######  ######      ######         ####
+###############################################################################
+###############################################################################
+###############################################################################
+###############################################################################
+""";
+  }
+
+  public static void DoJobSetup(IServiceCollectionQuartzConfigurator q)
+  {
+
+  }
+
+
+
   public static void TickServer(CancellationToken ct,
                                 ref List<string> runningThreadList)
   {
