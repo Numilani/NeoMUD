@@ -4,8 +4,11 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using SuperSocket.Server.Host;
 using SuperSocket.ProtoBase;
-using System.Text;
 using SuperSocket.Server.Abstractions;
+using SuperSocket.Server;
+using SuperSocket.Command;
+using System.Reflection;
+using NeoMUD.src.Jobs;
 
 namespace NeoMUD.src;
 
@@ -18,9 +21,27 @@ public class NeoMUD
 
     var builder = SuperSocketHostBuilder.Create<StringPackageInfo, CommandLinePipelineFilter>();
 
+    SetupSupportingServices(builder);
+    SetupSocketConfig(builder);
+
+    var host = builder.Build();
+
+    await DoJobSetupAsync(await host.Services.GetRequiredService<ISchedulerFactory>().GetScheduler());
+
+    var lifetime = host.Services.GetRequiredService<IHostApplicationLifetime>();
+    lifetime.ApplicationStarted.Register(ShowStartupSplash);
+    lifetime.ApplicationStopped.Register(ShowExitSplash);
+
+    await host.RunAsync();
+
+  }
+
+  public static void SetupSupportingServices(SuperSocket.Server.Abstractions.Host.ISuperSocketHostBuilder<StringPackageInfo> builder)
+  {
     Log.Logger = new LoggerConfiguration()
             .MinimumLevel.Debug()
-            .WriteTo.Console(restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning)
+            // .WriteTo.Console(restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning)
+            .WriteTo.Console()
             .WriteTo.File("logs/debug.log", rollingInterval: RollingInterval.Hour)
             .WriteTo.SQLite("data.db", storeTimestampInUtc: true)
             .CreateLogger();
@@ -29,50 +50,47 @@ public class NeoMUD
 
     builder.ConfigureServices((hostContext, services) =>
     {
-      services.AddQuartz(q =>
-      {
-        DoJobSetup(q);
-      });
+      services.AddQuartz();
       services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
     });
-    
-    builder.UseSessionHandler(async (s) => 
-        {
-          await s.SendAsync(Encoding.UTF8.GetBytes(ConnectionSplash() + "\r\n"));
-        },
-        async (s,e) => 
-        {
-          // do nothing
-        });
-    builder.UsePackageHandler(async (session, package) => {
-      var result = "";
+  }
 
-        switch (package.Key.ToUpper()){
-        case "PING":
-          result = "PONG";
-          break;
-        default:
-          result = "UNK";
-          break;
-        }
+  public static void SetupSocketConfig(SuperSocket.Server.Abstractions.Host.ISuperSocketHostBuilder<StringPackageInfo> builder)
+  {
+    builder.UseSession<GameSession>();
+    builder.UseSessionHandler(async (s) =>
+          {
+            await s.SendTelnetStringAsync(ConnectionSplash());
+          },
+          async (s, e) =>
+          {
+            // do nothing
+          });
+    builder.UseCommand((cmdOpts) =>
+    {
+      cmdOpts.AddCommandAssembly(Assembly.GetExecutingAssembly());
+    });
 
-      await session.SendAsync(Encoding.UTF8.GetBytes(result + "\r\n"));
-      });
+    builder.ConfigureSuperSocket(opts =>
+    {
+      opts.Name = "NeoMUD alpha1 (telnet-test)";
+      opts.Listeners = new List<ListenOptions> { new ListenOptions { Ip = "Any", Port = 4040 } };
+    });
+  }
 
-    builder.ConfigureSuperSocket(opts => {
-        opts.Name = "NeoMUD alpha1 (telnet-test)";
-        opts.Listeners = new List<ListenOptions>{new ListenOptions{Ip = "Any", Port = 4040}};
-        });
-
-    var host = builder.Build();
-
-    var lifetime = host.Services.GetRequiredService<IHostApplicationLifetime>();
-    lifetime.ApplicationStarted.Register(ShowStartupSplash);
-    lifetime.ApplicationStopped.Register(ShowExitSplash);
-
-
-    await host.RunAsync();
-
+  public static async Task DoJobSetupAsync(IScheduler scheduler)
+  {
+    // set up jobs
+    await scheduler.ScheduleJob(
+        JobBuilder.Create<TickServerJob>()
+          .WithIdentity("TickServer", "processing")
+          .Build(),
+          TriggerBuilder.Create()
+            .WithSimpleSchedule(x => x
+              .WithIntervalInMinutes(1)
+              .RepeatForever())
+            .Build()
+        );
   }
 
   public static void ShowStartupSplash()
@@ -99,7 +117,8 @@ Stopping At:                                                 Graceful Shutdown:
 """);
   }
 
-  public static string ConnectionSplash(){
+  public static string ConnectionSplash()
+  {
     return $"""
 ###############################################################################
 ###############################################################################
@@ -128,25 +147,4 @@ Stopping At:                                                 Graceful Shutdown:
 """;
   }
 
-  public static void DoJobSetup(IServiceCollectionQuartzConfigurator q)
-  {
-
-  }
-
-
-
-  public static void TickServer(CancellationToken ct,
-                                ref List<string> runningThreadList)
-  {
-    runningThreadList.Add("TickServer");
-    Log.Information("Started server tick thread");
-    while (!ct.IsCancellationRequested)
-    {
-      // do server ticking logic here
-    }
-
-    // following code runs after cancellation requested
-    Log.Information("Stopping server tick thread...");
-    runningThreadList.Remove("TickServer");
-  }
 }
