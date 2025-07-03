@@ -1,11 +1,17 @@
 using Microsoft.EntityFrameworkCore;
-using NeoMUD.src;
+using NeoMUD.src.Models;
 
-public class AppDbContext : DbContext {
-  
-  public DbSet<Room> Rooms {get;set;} = default!;
+namespace NeoMUD.src;
 
-  protected override void OnConfiguring(DbContextOptionsBuilder builder){
+public class AppDbContext : DbContext
+{
+
+  public DbSet<User> Users { get; set; } = default!;
+  public DbSet<Character> Characters { get; set; } = default!;
+  public DbSet<Room> Rooms { get; set; } = default!;
+
+  protected override void OnConfiguring(DbContextOptionsBuilder builder)
+  {
     builder.UseSqlite("data.db");
   }
 }
