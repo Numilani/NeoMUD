@@ -9,6 +9,9 @@ using SuperSocket.Server;
 using SuperSocket.Command;
 using System.Reflection;
 using NeoMUD.src.Jobs;
+using Microsoft.EntityFrameworkCore;
+using NeoMUD.src.Views;
+using NeoMUD.src.Services;
 
 namespace NeoMUD.src;
 
@@ -50,6 +53,12 @@ public class NeoMUD
 
     builder.ConfigureServices((hostContext, services) =>
     {
+      services.AddDbContext<AppDbContext>(o =>
+      {
+        o.UseSqlite("neomud.db");
+      });
+      services.AddScoped<UserService>();
+      services.AddScoped<ViewManager>();
       services.AddQuartz();
       services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
     });
@@ -60,16 +69,24 @@ public class NeoMUD
     builder.UseSession<GameSession>();
     builder.UseSessionHandler(async (s) =>
           {
-            await s.SendTelnetStringAsync(LoginView.Display());
+            await s.SendTelnetStringAsync(new LoginView((GameSession)s).Display());
           },
           async (s, e) =>
           {
             // do nothing
           });
     builder.UseCommand((cmdOpts) =>
-    {
-      cmdOpts.AddCommandAssembly(Assembly.GetExecutingAssembly());
-    });
+     {
+       cmdOpts.AddCommandAssembly(Assembly.GetExecutingAssembly());
+       cmdOpts.RegisterUnknownPackageHandler<StringPackageInfo>(async (session, pkg, ct) => { 
+           var gs = (GameSession)session;
+           if (gs.AwaitingInput){
+            gs.StringInput = $"{pkg.Key} ${pkg.Body}";
+           }
+           else await session.SendTelnetStringAsync("Unknown command");
+           });
+     });
+
 
     builder.ConfigureSuperSocket(opts =>
     {

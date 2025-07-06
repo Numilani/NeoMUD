@@ -1,4 +1,4 @@
-using NeoMUD.src.Models;
+using NeoMUD.src.Services;
 using SuperSocket.Command;
 using SuperSocket.ProtoBase;
 
@@ -7,10 +7,12 @@ namespace NeoMUD.src.commands;
 public class LOGIN : IAsyncCommand<GameSession, StringPackageInfo>
 {
   private readonly UserService _userSvc;
+  private readonly ViewManager _view;
 
-    public LOGIN(UserService usr)
+    public LOGIN(UserService usr, ViewManager view)
     {
       _userSvc = usr;
+      _view = view;
     }
 
     public async ValueTask ExecuteAsync(GameSession session, StringPackageInfo package, CancellationToken cancellationToken)
@@ -31,9 +33,9 @@ public class LOGIN : IAsyncCommand<GameSession, StringPackageInfo>
       }
 
       session.UserId = user.Id;
-      session.UpdateView(CurrentView.LOGIN_CHAR_PICK);
+      _view.UpdateView(session, new CharPickView(session));
 
-      // TODO: lookup credentials, set session userid, greet player
+
     }
 }
 

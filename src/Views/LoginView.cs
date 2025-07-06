@@ -1,9 +1,13 @@
-public class LoginView
-{
+namespace NeoMUD.src.Views;
 
-  public static string Display()
-  {
-    return $"""
+public class LoginView(GameSession session) : IView
+{
+    public string[] ValidCommands {get;set;} = Array.Empty<string>();
+    public GameSession Session { get; set; } = session;
+
+    public string Display()
+    {
+        return $"""
 ###############################################################################
 ###############################################################################
 ###  ######  ####          #####        #######################################
@@ -29,6 +33,10 @@ public class LoginView
 #                  LOGIN <username> <password> or REGISTER                    #
 # +++ === +++ === +++ === +++ === +++ === +++ === +++ === +++ === +++ === +++ #
 """;
-  }
+    }
 
+    public void ReceiveTextInput(string msg)
+    {
+        throw new NotImplementedException();
+    }
 }
