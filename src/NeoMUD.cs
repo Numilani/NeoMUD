@@ -75,19 +75,20 @@ public class NeoMUD
           {
             // do nothing
           });
-    builder.UseCommand((cmdOpts) =>
-     {
-       cmdOpts.AddCommandAssembly(Assembly.GetExecutingAssembly());
-       cmdOpts.RegisterUnknownPackageHandler<StringPackageInfo>(async (session, pkg, ct) => { 
-           var gs = (GameSession)session;
-           if (gs.AwaitingInput){
-            gs.StringInput = $"{pkg.Key} ${pkg.Body}";
-           }
-           else await session.SendTelnetStringAsync("Unknown command");
-           });
-     });
-
-
+    builder.UsePackageHandler(async (session, package) => {
+        ((GameSession)session).CurrentView.ReceiveInput(package);
+        });
+    // builder.UseCommand((cmdOpts) =>
+    //  {
+    //    cmdOpts.AddCommandAssembly(Assembly.GetExecutingAssembly());
+    //    cmdOpts.RegisterUnknownPackageHandler<StringPackageInfo>(async (session, pkg, ct) => { 
+    //        var gs = (GameSession)session;
+    //        if (gs.AwaitingInput){
+    //         gs.StringInput = $"{pkg.Key} ${pkg.Body}";
+    //        }
+    //        else await session.SendTelnetStringAsync("Unknown command");
+    //        });
+    //  });
     builder.ConfigureSuperSocket(opts =>
     {
       opts.Name = "NeoMUD alpha1 (telnet-test)";

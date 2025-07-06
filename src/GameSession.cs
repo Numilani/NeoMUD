@@ -13,22 +13,9 @@ public class GameSession : AppSession
 
   public bool AwaitingInput { get; set; }
 
-  private string _stringInput;
-
     public GameSession()
     {
       CurrentView = new LoginView(this);
     }
-
-    public string StringInput
-  {
-    get => _stringInput;
-    set
-    {
-      _stringInput = value;
-      CurrentView.ReceiveTextInput(_stringInput);
-    }
-  }
-
 
 }
