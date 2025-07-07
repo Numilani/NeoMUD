@@ -6,7 +6,7 @@ public interface IView
 {
     public abstract GameSession Session {get;set;}
 
-    public string Display();
+    public Task Display();
 
-    public void ReceiveInput(StringPackageInfo pkg);
+    public Task ReceiveInput(StringPackageInfo pkg);
 }

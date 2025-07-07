@@ -19,6 +19,5 @@ public class AppDbContext : DbContext
 
   protected override void OnConfiguring(DbContextOptionsBuilder builder)
   {
-    builder.UseSqlite("data.db");
   }
 }

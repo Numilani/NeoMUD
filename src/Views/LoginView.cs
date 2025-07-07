@@ -3,15 +3,14 @@ using SuperSocket.ProtoBase;
 
 namespace NeoMUD.src.Views;
 
-public class LoginView(GameSession session, UserService userSvc, ViewManager view) : IView
+public class LoginView(GameSession session, UserService userSvc) : IView
 {
   public GameSession Session { get; set; } = session;
   private UserService UserSvc { get; set; } = userSvc;
-  private ViewManager View { get; set; } = view;
 
-  public string Display()
+  public async Task Display()
   {
-    return $"""
+    await Session.SendTelnetStringAsync($"""
 ################################################################################
 ################################################################################
 ###  ######  ####          #####        ########################################
@@ -36,7 +35,7 @@ public class LoginView(GameSession session, UserService userSvc, ViewManager vie
 # +++ === +++ === +++ === +++ === +++ ==== +++ === +++ === +++ === +++ === +++ #
 #                   LOGIN <username> <password> or REGISTER                    #
 # +++ === +++ === +++ === +++ === +++ ==== +++ === +++ === +++ === +++ === +++ #
-""";
+""");
   }
 
   public async Task LOGIN(StringPackageInfo pkg)
@@ -59,12 +58,12 @@ public class LoginView(GameSession session, UserService userSvc, ViewManager vie
     }
 
     session.UserId = user.Id;
-    View.UpdateView(session, new CharPickView(session));
+    session.UpdateView(typeof(CharPickView));
   }
 
-  public async Task REGISTER()
+  public void REGISTER()
   {
-    // TODO: create RegisterView
+    session.UpdateView(typeof(RegisterView));
   }
 
   public async Task ReceiveInput(StringPackageInfo pkg)
@@ -75,7 +74,7 @@ public class LoginView(GameSession session, UserService userSvc, ViewManager vie
         await LOGIN(pkg);
         break;
       case "REGISTER":
-        await REGISTER();
+        REGISTER();
         break;
       default:
         session.SendTelnetStringAsync("Invalid command - LOGIN or REGISTER");

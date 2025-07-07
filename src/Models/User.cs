@@ -16,6 +16,8 @@ public class User
 
     public bool IsActive {get;set;} = true;
 
+    public User(){}
+
     public User(string username, string password)
     {
         Username = username;

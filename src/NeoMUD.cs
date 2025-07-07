@@ -55,7 +55,7 @@ public class NeoMUD
     {
       services.AddDbContext<AppDbContext>(o =>
       {
-        o.UseSqlite("neomud.db");
+        o.UseSqlite("Data Source=neomud.db");
       });
       services.AddScoped<UserService>();
       services.AddScoped<ViewManager>();
@@ -69,15 +69,16 @@ public class NeoMUD
     builder.UseSession<GameSession>();
     builder.UseSessionHandler(async (s) =>
           {
-            await s.SendTelnetStringAsync(new LoginView((GameSession)s).Display());
+            await ((GameSession)s).CurrentView.Display();
           },
           async (s, e) =>
           {
             // do nothing
           });
-    builder.UsePackageHandler(async (session, package) => {
-        ((GameSession)session).CurrentView.ReceiveInput(package);
-        });
+    builder.UsePackageHandler(async (session, package) =>
+    {
+      await ((GameSession)session).CurrentView.ReceiveInput(package);
+    });
     // builder.UseCommand((cmdOpts) =>
     //  {
     //    cmdOpts.AddCommandAssembly(Assembly.GetExecutingAssembly());

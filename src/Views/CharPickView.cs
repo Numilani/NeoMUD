@@ -8,21 +8,12 @@ public class CharPickView(GameSession session) : IView
 {
     public GameSession Session { get; set; } = session;
 
-    public string Display()
-    {
-        List<Character> chars = new();
-
-
-        throw new NotImplementedException();
-    }
-
-    public void ReceiveInput(StringPackageInfo pkg)
+    public Task Display()
     {
         throw new NotImplementedException();
     }
 
-    
-    public void ReceiveTextInput(string msg)
+    public Task ReceiveInput(StringPackageInfo pkg)
     {
         throw new NotImplementedException();
     }
