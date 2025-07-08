@@ -1,16 +1,15 @@
+using Microsoft.Extensions.Logging;
 using NeoMUD.src.Services;
 using SuperSocket.ProtoBase;
 
 namespace NeoMUD.src.Views;
 
-public class LoginView(GameSession session, UserService userSvc) : IView
+public class LoginView(GameSession session, UserService userSvc, ILogger<LoginView> logger) : IView
 {
-  public GameSession Session { get; set; } = session;
-  private UserService UserSvc { get; set; } = userSvc;
 
   public async Task Display()
   {
-    await Session.SendTelnetStringAsync($"""
+    await session.SendTelnetStringAsync($"""
 ################################################################################
 ################################################################################
 ###  ######  ####          #####        ########################################
@@ -42,14 +41,14 @@ public class LoginView(GameSession session, UserService userSvc) : IView
   {
     if (pkg.Parameters.Length != 2)
     {
-      await Session.SendTelnetStringAsync("Syntax: LOGIN <username> <password>");
+      await session.SendTelnetStringAsync("Syntax: LOGIN <username> <password>");
       return;
     }
 
     var username = pkg.Parameters[0];
     var password = pkg.Parameters[1];
 
-    var user = UserSvc.AttemptSignin(username, password);
+    var user = userSvc.AttemptSignin(username, password);
 
     if (user is null)
     {
@@ -77,7 +76,7 @@ public class LoginView(GameSession session, UserService userSvc) : IView
         REGISTER();
         break;
       default:
-        session.SendTelnetStringAsync("Invalid command - LOGIN or REGISTER");
+        await session.SendTelnetStringAsync("Invalid command - LOGIN or REGISTER");
         break;
     }
   }

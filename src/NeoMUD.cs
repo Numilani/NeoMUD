@@ -58,6 +58,7 @@ public class NeoMUD
         o.UseSqlite("Data Source=neomud.db");
       });
       services.AddScoped<UserService>();
+      services.AddScoped<CharacterService>();
       services.AddScoped<ViewManager>();
       services.AddQuartz();
       services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
