@@ -6,6 +6,6 @@ public static class GlobalCommands
 {
     public static async Task PING(GameSession session)
     {
-      await session.SendTelnetStringAsync("PONG");
+      await session.PrintLine("PONG");
     }
 }

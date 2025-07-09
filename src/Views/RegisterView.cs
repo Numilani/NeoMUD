@@ -20,29 +20,29 @@ public class RegisterView(GameSession session, UserService userSvc, ILogger<Regi
     switch (CurrentState)
     {
       case "requestUsername":
-        await session.SendTelnetStringAsync($"""
+        await session.PrintLine($"""
             Enter a new username:
             """);
         break;
       case "requestPassword":
-        await session.SendTelnetStringAsync($"""
+        await session.PrintLine($"""
 
             Enter a password:
             """);
         break;
       case "verifyPassword":
-        await session.SendTelnetStringAsync($"""
+        await session.PrintLine($"""
               Verify your password: 
               """);
         break;
       case "requestEmail":
-        await session.SendTelnetStringAsync($"""
+        await session.PrintLine($"""
 
                 (Optional) Enter an email address, in case you forget your password. Enter "NONE" to skip.
                 """);
         break;
       case "finalize":
-        await session.SendTelnetStringAsync($"""
+        await session.PrintLine($"""
 
                 SUCCESS!
                 New account created with username '{Username}' and email '{Email}'. Type CONTINUE to log in, or EXIT to exit.
@@ -76,7 +76,7 @@ public class RegisterView(GameSession session, UserService userSvc, ILogger<Regi
         {
           if (Password != pkg.Key)
           {
-            await session.SendTelnetStringAsync("Passwords do not match.");
+            await session.PrintLine("Passwords do not match.");
             CurrentState = "requestUsername";
             await Display();
           }
@@ -100,7 +100,7 @@ public class RegisterView(GameSession session, UserService userSvc, ILogger<Regi
           catch (Exception e)
           {
             logger.LogWarning(e, "Couldn't create user");
-            await session.SendTelnetStringAsync("Couldn't create your new user at this time - try again later.");
+            await session.PrintLine("Couldn't create your new user at this time - try again later.");
             CurrentState = "requestUsername";
             await Display();
           }
@@ -111,20 +111,20 @@ public class RegisterView(GameSession session, UserService userSvc, ILogger<Regi
         {
           var user = userSvc.AttemptSignin(Username, Password);
           if (user is null){
-            await session.SendTelnetStringAsync("Couldn't log you in - try again later?");
+            await session.PrintLine("Couldn't log you in - try again later?");
             session.CloseAsync();
           }
           session.UserId = user.Id;
-          session.ViewMgr.Create(typeof(CharPickView));
+          session.UpdateView(typeof(CharPickView));
         }
         else if (pkg.Key.ToUpper() == "EXIT")
         {
-          await session.SendTelnetStringAsync($"Goodbye, {Username}!");
+          await session.PrintLine($"Goodbye, {Username}!");
           await session.CloseAsync();
         }
         else
         {
-          session.SendTelnetStringAsync("LOGIN or EXIT, please.");
+          session.PrintLine("LOGIN or EXIT, please.");
         }
         break;
     }

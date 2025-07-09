@@ -19,9 +19,11 @@ public class ViewManager(UserService UserSvc, CharacterService CharSvc, ILoggerF
       case Type register when register == typeof(RegisterView):
         return new RegisterView(Session, UserSvc, _logFactory.CreateLogger<RegisterView>());
       case Type charCreate when charCreate == typeof(CharCreateView):
-        return new CharCreateView();
+        return new CharCreateView(Session, _logFactory.CreateLogger<CharCreateView>());
       case Type charPick when charPick == typeof(CharPickView):
         return new CharPickView(Session, CharSvc, _logFactory.CreateLogger<CharPickView>());
+      case Type room when room == typeof(RoomView):
+        return new RoomView(Session, _logFactory.CreateLogger<RoomView>());
       default:
         throw new Exception("Invalid View type");
     }

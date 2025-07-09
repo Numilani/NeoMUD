@@ -12,7 +12,7 @@ public class CharPickView(GameSession session, CharacterService charSvc, ILogger
 
   public async Task Display()
   {
-    await session.SendTelnetStringAsync($"""
+    await session.PrintLine($"""
 ################################################################################
 #####                                                                      #####
 #####          CHOOSE             YOUR                CHARACTER            #####
@@ -25,7 +25,7 @@ public class CharPickView(GameSession session, CharacterService charSvc, ILogger
 
     foreach (var c in Characters)
     {
-      await session.SendTelnetStringAsync($"""
+      await session.PrintLine($"""
           ${c.Index}) - {c.Character.CharacterName}
 """);
     }
@@ -33,19 +33,24 @@ public class CharPickView(GameSession session, CharacterService charSvc, ILogger
 
   public async Task ReceiveInput(StringPackageInfo pkg)
   {
-    if ( pkg.Key.ToUpper() == "NEW" ){
-      // TODO: move to CharCreateView
+    if (pkg.Key.ToUpper() == "NEW")
+    {
+      session.UpdateView(typeof(CharCreateView));
     }
-    else{
-      try {
+    else
+    {
+      try
+      {
         var x = Convert.ToInt32(pkg.Key.Trim());
-        if (x >= 0 && Characters.Count < x){
+        if (x >= 0 && Characters.Count < x)
+        {
           session.CharId = Characters[x].Character.Id;
-          // TODO: move to CurrentRoomView
+          session.UpdateView(typeof(RoomView));
         }
       }
-      catch (FormatException){
-        await session.SendTelnetStringAsync("Invalid selection");
+      catch (FormatException)
+      {
+        await session.PrintLine("Invalid selection");
       }
     }
 
