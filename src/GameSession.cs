@@ -7,8 +7,9 @@ namespace NeoMUD.src;
 
 public class GameSession : AppSession
 {
-  public string? UserId { get; set; }
-  public string? CharId {get;set;}
+  public User? User {get;set;}
+  public Character? Character {get;set;}
+
   public IView CurrentView { get; set; }
   public bool AwaitingInput { get; set; }
  

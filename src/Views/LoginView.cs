@@ -56,7 +56,7 @@ public class LoginView(GameSession session, UserService userSvc, ILogger<LoginVi
       return;
     }
 
-    session.UserId = user.Id;
+    session.User = user;
     session.UpdateView(typeof(CharPickView));
   }
 

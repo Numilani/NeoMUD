@@ -1,16 +1,14 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using shortid;
-using shortid.Configuration;
 
-namespace NeoMUD.src;
+namespace NeoMUD.src.Models;
 
 [Table("Rooms")]
 public class Room
 {
 
     [Key]
-    public string Id { get; set; } = ShortId.Generate(new GenerationOptions(useSpecialCharacters: false));
+    public string Id { get; set; } = DatabaseHelpers.GenerateId(); 
 
     public string RoomName { get; set; } = string.Empty;
     public string DefaultDescription { get; set; } = string.Empty;
@@ -22,13 +20,13 @@ public class Room
     public Dictionary<string, string> Exits { get; } = new();
 
     // Lua is stored inline in DB
-    public string BeforeRoomEnterLua { get; set; } = string.Empty;
-    public string AfterRoomEnterLua { get; set; } = string.Empty;
+    public string? BeforeRoomEnterLua { get; set; }
+    public string? AfterRoomEnterLua { get; set; }
 
-    public string TickRoomLua { get; set; } = string.Empty;
+    public string? TickRoomLua { get; set; }
 
-    public string BeforeRoomExitLua { get; set; } = string.Empty;
-    public string AfterRoomExitLua { get; set; } = string.Empty;
+    public string? BeforeRoomExitLua { get; set; }
+    public string? AfterRoomExitLua { get; set; }
 
 
     public bool AddExit(string name, string id)

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using NeoMUD.src;
+using NeoMUD.src.Services;
 using Serilog;
 using SuperSocket.ProtoBase;
 
@@ -114,7 +115,7 @@ public class RegisterView(GameSession session, UserService userSvc, ILogger<Regi
             await session.PrintLine("Couldn't log you in - try again later?");
             session.CloseAsync();
           }
-          session.UserId = user.Id;
+          session.User = user;
           session.UpdateView(typeof(CharPickView));
         }
         else if (pkg.Key.ToUpper() == "EXIT")

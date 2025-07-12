@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using NeoMUD.src;
 using NeoMUD.src.Models;
 using NeoMUD.src.Services;
 using SuperSocket.ProtoBase;
@@ -21,7 +20,8 @@ public class CharPickView(GameSession session, CharacterService charSvc, ILogger
 #####     0-9 to select character          NEW to create new character     #####
 ################################################################################
 """);
-    Characters = charSvc.GetCharacters(session.UserId!).Index().ToList();
+    var cs = await charSvc.GetCharacters(session.User!.Id);
+    Characters = cs.Index().ToList();
 
     foreach (var c in Characters)
     {
@@ -42,9 +42,9 @@ public class CharPickView(GameSession session, CharacterService charSvc, ILogger
       try
       {
         var x = Convert.ToInt32(pkg.Key.Trim());
-        if (x >= 0 && Characters.Count < x)
+        if (x >= 0 && x < Characters.Count)
         {
-          session.CharId = Characters[x].Character.Id;
+          session.Character = Characters[x].Character;
           session.UpdateView(typeof(RoomView));
         }
       }

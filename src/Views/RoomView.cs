@@ -1,13 +1,17 @@
 using Microsoft.Extensions.Logging;
+using NeoMUD.src.Services;
 using SuperSocket.ProtoBase;
 
 namespace NeoMUD.src.Views
 {
-    public class RoomView(GameSession session, ILogger<RoomView> logger) : IView
+    public class RoomView(GameSession session, RoomService roomSvc, ILogger<RoomView> logger) : IView
     {
-        public Task Display()
+        public async Task Display()
         {
-            throw new NotImplementedException();
+          var room = await roomSvc.GetRoom(session.Character!.CurrentRoomId ?? "00000000");
+
+          await session.PrintLine(room.RoomName + "\n\n");
+          await session.PrintLine(room.DefaultDescription);
         }
 
         public Task ReceiveInput(StringPackageInfo pkg)

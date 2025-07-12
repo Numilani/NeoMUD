@@ -4,7 +4,7 @@ using NeoMUD.src.Views;
 
 namespace NeoMUD.src.Services;
 
-public class ViewManager(UserService UserSvc, CharacterService CharSvc, ILoggerFactory _logFactory)
+public class ViewManager(UserService UserSvc, CharacterService CharSvc, RoomService RoomSvc, ILoggerFactory _logFactory)
 {
   private GameSession Session;
 
@@ -19,11 +19,11 @@ public class ViewManager(UserService UserSvc, CharacterService CharSvc, ILoggerF
       case Type register when register == typeof(RegisterView):
         return new RegisterView(Session, UserSvc, _logFactory.CreateLogger<RegisterView>());
       case Type charCreate when charCreate == typeof(CharCreateView):
-        return new CharCreateView(Session, _logFactory.CreateLogger<CharCreateView>());
+        return new CharCreateView(Session, CharSvc, _logFactory.CreateLogger<CharCreateView>());
       case Type charPick when charPick == typeof(CharPickView):
         return new CharPickView(Session, CharSvc, _logFactory.CreateLogger<CharPickView>());
       case Type room when room == typeof(RoomView):
-        return new RoomView(Session, _logFactory.CreateLogger<RoomView>());
+        return new RoomView(Session, RoomSvc, _logFactory.CreateLogger<RoomView>());
       default:
         throw new Exception("Invalid View type");
     }

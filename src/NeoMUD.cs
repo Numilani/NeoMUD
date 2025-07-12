@@ -5,12 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using SuperSocket.Server.Host;
 using SuperSocket.ProtoBase;
 using SuperSocket.Server.Abstractions;
-using SuperSocket.Server;
-using SuperSocket.Command;
-using System.Reflection;
 using NeoMUD.src.Jobs;
 using Microsoft.EntityFrameworkCore;
-using NeoMUD.src.Views;
 using NeoMUD.src.Services;
 
 namespace NeoMUD.src;
@@ -59,6 +55,7 @@ public class NeoMUD
       });
       services.AddScoped<UserService>();
       services.AddScoped<CharacterService>();
+      services.AddScoped<RoomService>();
       services.AddScoped<ViewManager>();
       services.AddQuartz();
       services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);

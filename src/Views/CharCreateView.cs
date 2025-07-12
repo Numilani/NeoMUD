@@ -1,9 +1,11 @@
 using Microsoft.Extensions.Logging;
+using NeoMUD.src.Models;
+using NeoMUD.src.Services;
 using SuperSocket.ProtoBase;
 
 namespace NeoMUD.src.Views;
 
-public class CharCreateView(GameSession session, ILogger<CharCreateView> logger) : IView
+public class CharCreateView(GameSession session, CharacterService charSvc, ILogger<CharCreateView> logger) : IView
 {
 
   private string[] States { get; set; } = ["requestName", "requestDescription", "finalize"];
@@ -60,8 +62,9 @@ CONTINUE if this looks correct, RESTART if it doesn't, or EXIT to discard.
         switch (pkg.Key.ToUpper())
         {
           case "CONTINUE":
-            // TODO: save character to database
-            session.ViewMgr.Create(typeof(CharPickView));
+            Character c = new() { CharacterName = name, CharacterDescription = description, User = session.User };
+            charSvc.CreateCharacter(c);
+            session.UpdateView(typeof(CharPickView));
             break;
           case "RESTART":
             name = string.Empty;

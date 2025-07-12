@@ -2,77 +2,70 @@ using Microsoft.Extensions.Logging;
 using NeoMUD.src;
 using NeoMUD.src.Models;
 
-public class UserService
+namespace NeoMUD.src.Services;
+
+public class UserService(AppDbContext _context, ILogger<UserService> _logger)
 {
 
-  private AppDbContext _context;
-  private ILogger<UserService> _logger;
-
-  public UserService(AppDbContext ctx, ILogger<UserService> logger)
-  {
-    _context = ctx;
-    _logger = logger;
-  }
-
-  public void CreateUser(string username, string password)
-  {
-    if (_context.Users.Any(x => x.Username == username))
+    public void CreateUser(string username, string password)
     {
-      _logger.LogWarning("User attempted to register username '{username}' which already exists", username);
-      throw new Exception("User already exists");
-    }
-    User newUser = new(username, password);
-    _context.Users.Add(newUser);
+        if (_context.Users.Any(x => x.Username == username))
+        {
+            _logger.LogWarning("User attempted to register username '{username}' which already exists", username);
+            throw new Exception("User already exists");
+        }
+        User newUser = new(username, password);
+        _context.Users.Add(newUser);
 
-    try
-    {
-      _context.SaveChanges();
-    }
-    catch (Exception e)
-    {
-      _logger.LogError(e, "Failed to save new user");
-      throw;
-    }
-  }
-
-  public User? AttemptSignin(string username, string password)
-  {
-    var checkedUser = _context.Users.FirstOrDefault(x => x.Username == username);
-
-    if (checkedUser is null)
-    {
-      return null;
+        try
+        {
+            _context.SaveChanges();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Failed to save new user");
+            throw;
+        }
     }
 
-    if (!BCrypt.Net.BCrypt.Verify(password, checkedUser.PasswordHash))
+    public User? AttemptSignin(string username, string password)
     {
-      return null;
+        var checkedUser = _context.Users.FirstOrDefault(x => x.Username == username);
+
+        if (checkedUser is null)
+        {
+            return null;
+        }
+
+        if (!BCrypt.Net.BCrypt.Verify(password, checkedUser.PasswordHash))
+        {
+            return null;
+        }
+
+        return checkedUser;
     }
 
-    return checkedUser;
-  }
-
-  public void DeleteUser(string username)
-  {
-    var user = _context.Users.FirstOrDefault(x => x.Username == username);
-
-    if (user is null)
+    public void DeleteUser(string username)
     {
-      throw new Exception("User to delete could not be found");
-    }
+        var user = _context.Users.FirstOrDefault(x => x.Username == username);
 
-    user.IsActive = false;
-    _context.Users.Update(user);
+        if (user is null)
+        {
+            throw new Exception("User to delete could not be found");
+        }
 
-    try
-    {
-      _context.SaveChanges();
+        user.IsActive = false;
+        _context.Users.Update(user);
+
+        try
+        {
+            _context.SaveChanges();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Failed to disable user");
+            throw;
+        }
     }
-    catch (Exception e)
-    {
-      _logger.LogError(e, "Failed to disable user");
-      throw;
-    }
-  }
 
 }
