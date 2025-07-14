@@ -38,7 +38,7 @@ public class NeoMUD
   public static void SetupSupportingServices(SuperSocket.Server.Abstractions.Host.ISuperSocketHostBuilder<StringPackageInfo> builder)
   {
     Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Debug()
+            .MinimumLevel.Information()
             // .WriteTo.Console(restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Warning)
             .WriteTo.Console()
             .WriteTo.File("logs/debug.log", rollingInterval: RollingInterval.Hour)
