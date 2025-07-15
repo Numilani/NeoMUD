@@ -27,7 +27,7 @@ public class CharPickView(GameSession session, CharacterService charSvc, ILogger
     foreach (var c in Characters)
     {
       await session.PrintLine($"""
-          ${c.Index}) - {c.Character.CharacterName}
+          {c.Index}) - {c.Character.CharacterName}
 """);
     }
   }

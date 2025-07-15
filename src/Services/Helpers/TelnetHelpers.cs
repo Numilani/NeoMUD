@@ -12,7 +12,7 @@ public static class TelnetHelpers
         await session.SendAsync(Encoding.UTF8.GetBytes(str + "\r\n"));
     }
 
-    public async static ValueTask PrintWrapped(this IAppSession session, string text, int maxLineLength, string prefix = null, string suffix = null)
+    public async static ValueTask PrintWrapped(this IAppSession session, string text, int maxLineLength, string prefix = "", string suffix = "")
     {
         if (string.IsNullOrEmpty(text))
             return;
