@@ -12,7 +12,7 @@ public class CharPickView(GameSession session, CharacterService charSvc, ILogger
 
   public async Task Display()
   {
-    await session.PrintLine($"""
+    await session.Print($"""
 ################################################################################
 #####                                                                      #####
 #####          CHOOSE             YOUR                CHARACTER            #####
@@ -26,7 +26,7 @@ public class CharPickView(GameSession session, CharacterService charSvc, ILogger
 
     foreach (var c in Characters)
     {
-      await session.PrintLine($"""
+      await session.Print($"""
           {c.Index}) - {c.Character.CharacterName}
 """);
     }
@@ -51,7 +51,7 @@ public class CharPickView(GameSession session, CharacterService charSvc, ILogger
       }
       catch (FormatException)
       {
-        await session.PrintLine("Invalid selection");
+        await session.Print("Invalid selection");
       }
     }
 

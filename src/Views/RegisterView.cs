@@ -22,29 +22,29 @@ public class RegisterView(GameSession session, UserService userSvc, ILogger<Regi
     switch (CurrentState)
     {
       case "requestUsername":
-        await session.PrintLine($"""
+        await session.Print($"""
             Enter a new username:
             """);
         break;
       case "requestPassword":
-        await session.PrintLine($"""
+        await session.Print($"""
 
             Enter a password:
             """);
         break;
       case "verifyPassword":
-        await session.PrintLine($"""
+        await session.Print($"""
               Verify your password: 
               """);
         break;
       case "requestEmail":
-        await session.PrintLine($"""
+        await session.Print($"""
 
                 (Optional) Enter an email address, in case you forget your password. Enter "NONE" to skip.
                 """);
         break;
       case "finalize":
-        await session.PrintLine($"""
+        await session.Print($"""
 
                 SUCCESS!
                 New account created with username '{Username}' and email '{Email}'. Type CONTINUE to log in, or EXIT to exit.
@@ -78,7 +78,7 @@ public class RegisterView(GameSession session, UserService userSvc, ILogger<Regi
         {
           if (Password != pkg.Key)
           {
-            await session.PrintLine("Passwords do not match.");
+            await session.Print("Passwords do not match.");
             CurrentState = "requestUsername";
             await Display();
           }
@@ -102,7 +102,7 @@ public class RegisterView(GameSession session, UserService userSvc, ILogger<Regi
           catch (Exception e)
           {
             logger.LogWarning(e, "Couldn't create user");
-            await session.PrintLine("Couldn't create your new user at this time - try again later.");
+            await session.Print("Couldn't create your new user at this time - try again later.");
             CurrentState = "requestUsername";
             await Display();
           }
@@ -113,7 +113,7 @@ public class RegisterView(GameSession session, UserService userSvc, ILogger<Regi
         {
           var user = userSvc.AttemptSignin(Username, Password);
           if (user is null){
-            await session.PrintLine("Couldn't log you in - try again later?");
+            await session.Print("Couldn't log you in - try again later?");
             session.CloseAsync();
           }
           session.User = user;
@@ -121,12 +121,12 @@ public class RegisterView(GameSession session, UserService userSvc, ILogger<Regi
         }
         else if (pkg.Key.ToUpper() == "EXIT")
         {
-          await session.PrintLine($"Goodbye, {Username}!");
+          await session.Print($"Goodbye, {Username}!");
           await session.CloseAsync();
         }
         else
         {
-          session.PrintLine("LOGIN or EXIT, please.");
+          session.Print("LOGIN or EXIT, please.");
         }
         break;
     }

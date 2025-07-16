@@ -21,26 +21,31 @@ public class CharCreateView(GameSession session, CharacterService charSvc, ILogg
     switch (CurrentState)
     {
       case "requestName":
-        await session.PrintLine("Enter your character's name: ");
+        await session.Print("Enter your character's name: ");
         break;
       case "requestDescription":
-        await session.PrintLine("Enter a brief, public description of your character: ");
+        await session.Print("Enter a brief, public description of your character: ");
         break;
       case "finalize":
-        await session.PrintLine($"""
-################################################################################
-          
-            NAME: {name}
+        await session.ClearScreen();
 
-            DESCRIPTION:
-""");
-        await session.PrintWrapped(description, 78);
-        await session.PrintLine($"""
-
-################################################################################
-
-CONTINUE if this looks correct, RESTART if it doesn't, or EXIT to discard.
-""");
+        await session.Print(session.SeparatorLine());
+        await session.Print(session.SeparatorLine(' ', 70).AddBorder());
+        await session.Print(
+$"NAME: {name}"
+.Prettify(70, TelnetTextExtensions.StringJustification.LEFT).AddBorder());
+        await session.Print(session.SeparatorLine(' ', 70).AddBorder());
+        await session.Print(
+$"DESCRIPTION: "
+.Prettify(70, TelnetTextExtensions.StringJustification.LEFT).AddBorder());
+        await session.Print(
+$"             {description}"
+.Prettify(70, TelnetTextExtensions.StringJustification.LEFT).AddBorder());
+        await session.Print(session.SeparatorLine(' ', 70).AddBorder());
+        await session.Print(session.SeparatorLine());
+        await session.Print(session.SeparatorLine(' ', 70).AddBorder());
+        await session.Print(
+"CONTINUE if this looks correct, RESTART if it doesn't, or EXIT to discard.");
         break;
     }
   }
@@ -77,7 +82,7 @@ CONTINUE if this looks correct, RESTART if it doesn't, or EXIT to discard.
             await session.CloseAsync();
             break;
           default:
-            await session.PrintLine("CONTINUE, RESTART, or EXIT please.");
+            await session.Print("CONTINUE, RESTART, or EXIT please.");
             break;
         }
         break;
