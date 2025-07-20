@@ -22,33 +22,29 @@ public class RegisterView(GameSession session, UserService userSvc, ILogger<Regi
     switch (CurrentState)
     {
       case "requestUsername":
-        await session.Print($"""
-            Enter a new username:
-            """);
+        await session.ClearScreen();
+        await session.PrintTopBorder();
+        await session.Printf("Enter a new username: ");
         break;
       case "requestPassword":
-        await session.Print($"""
-
-            Enter a password:
-            """);
+        await session.ClearScreen();
+        await session.PrintTopBorder();
+        await session.Printf($"USERNAME: {Username}");
+        await session.PrintBlankLine();
+        await session.Print($"Enter a password: ");
         break;
       case "verifyPassword":
-        await session.Print($"""
-              Verify your password: 
-              """);
+        await session.Printf($"Verify your password:");
         break;
       case "requestEmail":
-        await session.Print($"""
-
-                (Optional) Enter an email address, in case you forget your password. Enter "NONE" to skip.
-                """);
+        await session.ClearScreen();
+        await session.Printf("(Optional) Enter an email address, in case you forget your password. Enter 'NONE' to skip.");
         break;
       case "finalize":
-        await session.Print($"""
-
-                SUCCESS!
-                New account created with username '{Username}' and email '{Email}'. Type CONTINUE to log in, or EXIT to exit.
-                """);
+        await session.ClearScreen();
+        await session.Printf("SUCCESS!", TelnetTextExtensions.StringJustification.CENTER);
+        await session.Printf("New account created with username '{Username}' and email '{Email}'.", TelnetTextExtensions.StringJustification.CENTER);
+        await session.Printf("Type CONTINUE to log in, or EXIT to exit.", TelnetTextExtensions.StringJustification.CENTER);
         break;
     }
   }
@@ -109,7 +105,7 @@ public class RegisterView(GameSession session, UserService userSvc, ILogger<Regi
         }
         break;
       case "finalize":
-        if (pkg.Key.ToUpper() == "LOGIN")
+        if (pkg.Key.ToUpper() == "CONTINUE")
         {
           var user = userSvc.AttemptSignin(Username, Password);
           if (user is null){
@@ -126,7 +122,7 @@ public class RegisterView(GameSession session, UserService userSvc, ILogger<Regi
         }
         else
         {
-          await session.Print("LOGIN or EXIT, please.");
+          await session.Print("CONTINUE or EXIT, please.");
         }
         break;
     }

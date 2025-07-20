@@ -12,23 +12,18 @@ public class CharPickView(GameSession session, CharacterService charSvc, ILogger
 
   public async Task Display()
   {
-    await session.Print($"""
-################################################################################
-#####                                                                      #####
-#####          CHOOSE             YOUR                CHARACTER            #####
-#####                                                                      #####
-#####                                                                      #####
-#####     0-9 to select character          NEW to create new character     #####
-################################################################################
-""");
+    await session.ClearScreen();
+    await session.PrintTopBorder();
+    await session.Printf("CHOOSE YOUR CHARACTER", TelnetTextExtensions.StringJustification.CENTER);
+    await session.PrintBlankLine();
+    await session.Printf("0-9 to select character    NEW to create new character", TelnetTextExtensions.StringJustification.CENTER);
+    
     var cs = await charSvc.GetCharacters(session.User!.Id);
     Characters = cs.Index().ToList();
 
     foreach (var c in Characters)
     {
-      await session.Printf($"""
-          {c.Index}) - {c.Character.CharacterName}
-""", true);
+      await session.Printf($"     {c.Index}) - {c.Character.CharacterName}", TelnetTextExtensions.StringJustification.LEFT, true);
     }
   }
 

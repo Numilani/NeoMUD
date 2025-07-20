@@ -2,6 +2,7 @@ using System.Text;
 using NeoMUD.src;
 using SuperSocket.ProtoBase;
 using SuperSocket.Server.Abstractions.Session;
+using static NeoMUD.src.Services.Helpers.TelnetTextExtensions;
 
 namespace NeoMUD.src.Services.Helpers;
 
@@ -18,12 +19,12 @@ public static class TelnetHelpers
     if (!unterminated) await session.SendAsync(Encoding.UTF8.GetBytes("\r\n"));
   }
 
-  public async static ValueTask Printf(this IAppSession session, string str, bool unprettified = false, bool unbordered = false, bool unterminated = false)
+  public async static ValueTask Printf(this IAppSession session, string str, StringJustification justify = StringJustification.LEFT, bool unprettified = false, bool unbordered = false, bool unterminated = false) 
   {
     if (!unprettified)
     {
       string[] outstring;
-      outstring = str.Prettify();
+      outstring = str.Prettify(-1, justify);
       if (!unbordered) outstring.AddBorder();
       foreach (var line in outstring)
       {
