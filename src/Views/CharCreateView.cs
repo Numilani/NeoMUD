@@ -21,31 +21,32 @@ public class CharCreateView(GameSession session, CharacterService charSvc, ILogg
     switch (CurrentState)
     {
       case "requestName":
-        await session.Print("Enter your character's name: ");
+        await session.ClearScreen();
+
+        await session.PrintTopBorder();
+        await session.Printf($"NAME: ");
         break;
       case "requestDescription":
-        await session.Print("Enter a brief, public description of your character: ");
+        await session.ClearScreen();
+
+        await session.PrintTopBorder();
+        await session.Printf($"NAME: {name}");
+        await session.PrintBlankLine();
+        await session.Printf($"DESCRIPTION: ");
         break;
       case "finalize":
         await session.ClearScreen();
 
+        await session.PrintTopBorder();
+        await session.Printf($"NAME: {name}");
+        await session.PrintBlankLine();
+        await session.Printf($"DESCRIPTION: ");
+        await session.Printf($"             {description}");
+        await session.PrintBlankLine();
         await session.Print(session.SeparatorLine());
-        await session.Print(session.SeparatorLine(' ', 70).AddBorder());
-        await session.Print(
-$"NAME: {name}"
-.Prettify(70, TelnetTextExtensions.StringJustification.LEFT).AddBorder());
-        await session.Print(session.SeparatorLine(' ', 70).AddBorder());
-        await session.Print(
-$"DESCRIPTION: "
-.Prettify(70, TelnetTextExtensions.StringJustification.LEFT).AddBorder());
-        await session.Print(
-$"             {description}"
-.Prettify(70, TelnetTextExtensions.StringJustification.LEFT).AddBorder());
-        await session.Print(session.SeparatorLine(' ', 70).AddBorder());
-        await session.Print(session.SeparatorLine());
-        await session.Print(session.SeparatorLine(' ', 70).AddBorder());
-        await session.Print(
-"CONTINUE if this looks correct, RESTART if it doesn't, or EXIT to discard.");
+        await session.PrintBlankLine();
+        await session.Printf("CONTINUE if this looks correct, RESTART if it doesn't, or EXIT to discard.");
+        await session.PrintBottomBorder();
         break;
     }
   }

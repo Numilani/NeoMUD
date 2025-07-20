@@ -126,7 +126,7 @@ public class RegisterView(GameSession session, UserService userSvc, ILogger<Regi
         }
         else
         {
-          session.Print("LOGIN or EXIT, please.");
+          await session.Print("LOGIN or EXIT, please.");
         }
         break;
     }

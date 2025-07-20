@@ -59,8 +59,9 @@ public static class TelnetTextExtensions
     return str;
   }
 
-  public static string[] Prettify(this string str, int lineLength, StringJustification justify)
+  public static string[] Prettify(this string str, int lineLength = -1, StringJustification justify = StringJustification.LEFT)
   {
+    var MaxLength = lineLength != -1 ? lineLength : TelnetHelpers.LINE_LENGTH - (2 * TelnetHelpers.INNER_MARGIN);
     if (string.IsNullOrEmpty(str))
       return [str];
 
@@ -71,25 +72,25 @@ public static class TelnetTextExtensions
     foreach (var word in words)
     {
       // if the line is as long as it can get, add line to wrappedLine
-      if (currentLine.Length + word.Length + 1 > lineLength)
+      if (currentLine.Length + word.Length + 1 > MaxLength)
       {
         switch (justify)
         {
           case StringJustification.LEFT:
-            while (currentLine.Length < lineLength)
+            while (currentLine.Length < MaxLength)
             {
               currentLine.Append(' ');
             }
             break;
           case StringJustification.CENTER:
-            while (currentLine.Length % 2 == 0 && lineLength - currentLine.Length >= 2)
+            while (currentLine.Length % 2 == 0 && MaxLength - currentLine.Length >= 2)
             {
               currentLine.Insert(0, ' ');
               currentLine.Append(' ');
             }
             break;
           case StringJustification.RIGHT:
-            while (currentLine.Length < lineLength)
+            while (currentLine.Length < MaxLength)
             {
               currentLine.Insert(0, ' ');
             }
@@ -111,20 +112,20 @@ public static class TelnetTextExtensions
       switch (justify)
       {
         case StringJustification.LEFT:
-          while (currentLine.Length < lineLength)
+          while (currentLine.Length < MaxLength)
           {
             currentLine.Append(' ');
           }
           break;
         case StringJustification.CENTER:
-          while (currentLine.Length % 2 == 0 && lineLength - currentLine.Length >= 2)
+          while (currentLine.Length % 2 == 0 && MaxLength - currentLine.Length >= 2)
           {
             currentLine.Insert(0, ' ');
             currentLine.Append(' ');
           }
           break;
         case StringJustification.RIGHT:
-          while (currentLine.Length < lineLength)
+          while (currentLine.Length < MaxLength)
           {
             currentLine.Insert(0, ' ');
           }
