@@ -57,6 +57,8 @@ public class NeoMUD
       services.AddScoped<CharacterService>();
       services.AddScoped<RoomService>();
       services.AddScoped<ViewManager>();
+      services.AddScoped<AdminCommandHandler>();
+      services.AddScoped<PlayerCommandHandler>();
       services.AddQuartz();
       services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
     });
@@ -75,19 +77,19 @@ public class NeoMUD
           });
     builder.UsePackageHandler(async (session, package) =>
     {
-      await ((GameSession)session).CurrentView.ReceiveInput(package);
+      if (package.Key.StartsWith("#!"))
+      {
+        await ((GameSession)session).AdminCommands.ReceiveInput(package);
+      }
+      else if (package.Key.StartsWith('/'))
+      {
+      await ((GameSession)session).PlayerCommands.ReceiveInput(package);
+      }
+      else
+      {
+        await ((GameSession)session).CurrentView.ReceiveInput(package);
+      }
     });
-    // builder.UseCommand((cmdOpts) =>
-    //  {
-    //    cmdOpts.AddCommandAssembly(Assembly.GetExecutingAssembly());
-    //    cmdOpts.RegisterUnknownPackageHandler<StringPackageInfo>(async (session, pkg, ct) => { 
-    //        var gs = (GameSession)session;
-    //        if (gs.AwaitingInput){
-    //         gs.StringInput = $"{pkg.Key} ${pkg.Body}";
-    //        }
-    //        else await session.SendTelnetStringAsync("Unknown command");
-    //        });
-    //  });
     builder.ConfigureSuperSocket(opts =>
     {
       opts.Name = "NeoMUD alpha1 (telnet-test)";
