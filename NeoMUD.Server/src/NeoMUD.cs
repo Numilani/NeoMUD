@@ -56,7 +56,7 @@ public class NeoMUD
       services.AddScoped<UserService>();
       services.AddScoped<CharacterService>();
       services.AddScoped<RoomService>();
-      services.AddScoped<ViewManager>();
+      services.AddScoped<IViewFactory>();
       services.AddScoped<AdminCommandHandler>();
       services.AddScoped<PlayerCommandHandler>();
       services.AddQuartz();

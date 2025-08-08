@@ -14,11 +14,11 @@ public class GameSession : AppSession
   public IView CurrentView { get; set; }
   public bool AwaitingInput { get; set; }
 
-  public ViewManager ViewMgr;
+  public IViewFactory ViewMgr;
   public AdminCommandHandler AdminCommands;
   public PlayerCommandHandler PlayerCommands;
 
-  public GameSession(ViewManager viewMgr, ILoggerFactory logFactory, AppDbContext db)
+  public GameSession(IViewFactory viewMgr, ILoggerFactory logFactory, AppDbContext db)
   {
     ViewMgr = viewMgr;
     AdminCommands = new(this, logFactory.CreateLogger<AdminCommandHandler>(), db);

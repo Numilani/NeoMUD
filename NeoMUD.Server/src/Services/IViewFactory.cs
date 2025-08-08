@@ -4,7 +4,7 @@ using NeoMUD.src.Views;
 
 namespace NeoMUD.src.Services;
 
-public class ViewManager(UserService UserSvc, CharacterService CharSvc, RoomService RoomSvc, ILoggerFactory _logFactory)
+public class IViewFactory(UserService UserSvc, CharacterService CharSvc, RoomService RoomSvc, ILoggerFactory _logFactory)
 {
   private GameSession Session;
 
