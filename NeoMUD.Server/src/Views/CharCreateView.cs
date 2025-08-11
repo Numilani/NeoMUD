@@ -43,7 +43,7 @@ public class CharCreateView(GameSession session, CharacterService charSvc, ILogg
         await session.Printf($"DESCRIPTION: ");
         await session.Printf($"             {description}");
         await session.PrintBlankLine();
-        await session.Print(session.SeparatorLine());
+        await session.Print(TelnetHelpers.SEPARATOR_LINE);
         await session.PrintBlankLine();
         await session.Printf("CONTINUE if this looks correct, RESTART if it doesn't, or EXIT to discard.");
         await session.PrintBottomBorder();

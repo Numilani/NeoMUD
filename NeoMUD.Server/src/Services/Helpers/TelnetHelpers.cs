@@ -1,5 +1,4 @@
 using System.Text;
-using NeoMUD.src;
 using SuperSocket.ProtoBase;
 using SuperSocket.Server.Abstractions.Session;
 using static NeoMUD.src.Services.Helpers.TelnetTextExtensions;
@@ -12,6 +11,8 @@ public static class TelnetHelpers
   public static char SEPARATOR { get; set; } = '#';
   public static int LINE_LENGTH { get; set; } = 80;
   public static int INNER_MARGIN { get; set; } = 5;
+
+  public static string SEPARATOR_LINE {get;set;} = new string(SEPARATOR, LINE_LENGTH);
 
   public async static ValueTask Print(this IAppSession session, string str, bool unterminated = false)
   {
@@ -39,11 +40,6 @@ public static class TelnetHelpers
     }
   }
 
-  public static string SeparatorLine(this IAppSession s)
-  {
-    return new string(SEPARATOR, LINE_LENGTH);
-  }
-
   public async static ValueTask ClearScreen(this IAppSession session)
   {
     await session.SendAsync(Encoding.UTF8.GetBytes("\x1b[2J"));
@@ -51,7 +47,7 @@ public static class TelnetHelpers
 
   public static async ValueTask PrintTopBorder(this IAppSession session)
   {
-    await session.Print(session.SeparatorLine());
+    await session.Print(SEPARATOR_LINE);
     await session.PrintBlankLine();
   }
 
@@ -64,7 +60,7 @@ public static class TelnetHelpers
   public static async ValueTask PrintBottomBorder(this IAppSession session)
   {
     await session.PrintBlankLine();
-    await session.Print(session.SeparatorLine());
+    await session.Print(SEPARATOR_LINE);
   }
 
   public async static Task<bool> VerifyCommandParams(this StringPackageInfo pkg, GameSession session, int expectedParamCount, bool exact = true, string customErrorMsg = null)
