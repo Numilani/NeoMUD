@@ -1,43 +1,44 @@
 using System.Text;
 using SuperSocket.ProtoBase;
 using SuperSocket.Server.Abstractions.Session;
-using static NeoMUD.src.Services.Helpers.TelnetTextExtensions;
+using NeoMUD.src.Models;
 
 namespace NeoMUD.src.Services.Helpers;
 
 public static class TelnetHelpers
 {
+  public enum StringJustification { LEFT, CENTER, RIGHT }
 
-  public static char SEPARATOR { get; set; } = '#';
-  public static int LINE_LENGTH { get; set; } = 80;
-  public static int INNER_MARGIN { get; set; } = 5;
+  public static Dictionary<string, string> FORMAT_MAPPING = new(){
+{"<CLEAR>", "\x1b[0m"},
+{"<zBLACK>", "\x1b[30m"},
+{"<DARKRED>", "\x1b[31m"},
+{"<DARKGREEN>", "\x1b[32m"},
+{"<DARKYELLOW>", "\x1b[33m"},
+{"<DARKBLUE>", "\x1b[34m"},
+{"<DARKMAGENTA>", "\x1b[35m"},
+{"<DARKCYAN>", "\x1b[36m"},
+{"<DARKWHITE>", "\x1b[37m"},
+{"<BLACK2>", "\x1b[90m"},
+{"<RED>", "\x1b[91m"},
+{"<GREEN>", "\x1b[92m"},
+{"<YELLOW>", "\x1b[93m"},
+{"<BLUE>", "\x1b[94m"},
+{"<MAGENTA>", "\x1b[95m"},
+{"<CYAN>", "\x1b[96m"},
+{"<WHITE>", "\x1b[97m"},
+{"<BOLD>", "\x1b[1m"},
+{"<UNDERLINE>", "\x1b[4m"}
+};
 
-  public static string SEPARATOR_LINE {get;set;} = new string(SEPARATOR, LINE_LENGTH);
-
-  public async static ValueTask Print(this IAppSession session, string str, bool unterminated = false)
+  public static TelnetMessage FormMessage(this GameSession s)
   {
-    await session.SendAsync(Encoding.UTF8.GetBytes(str));
-    if (!unterminated) await session.SendAsync(Encoding.UTF8.GetBytes("\r\n"));
+    return new TelnetMessage(s);
   }
 
-  public async static ValueTask Printf(this IAppSession session, string str, StringJustification justify = StringJustification.LEFT, bool unprettified = false, bool unbordered = false, bool unterminated = false) 
+  public static async ValueTask SendRaw(this IAppSession session, string str)
   {
-    if (!unprettified)
-    {
-      string[] outstring;
-      outstring = str.Prettify(-1, justify);
-      if (!unbordered) outstring.AddBorder();
-      foreach (var line in outstring)
-      {
-        await session.SendAsync(Encoding.UTF8.GetBytes(line + "\r\n"));
-      }
-    }
-    else
-    {
-      if (!unbordered) str.AddBorder();
-      await session.SendAsync(Encoding.UTF8.GetBytes(str));
-      if (!unterminated) await session.SendAsync(Encoding.UTF8.GetBytes("\r\n"));
-    }
+    await session.SendAsync(Encoding.UTF8.GetBytes(str));
   }
 
   public async static ValueTask ClearScreen(this IAppSession session)
@@ -45,22 +46,9 @@ public static class TelnetHelpers
     await session.SendAsync(Encoding.UTF8.GetBytes("\x1b[2J"));
   }
 
-  public static async ValueTask PrintTopBorder(this IAppSession session)
+  public static async ValueTask SendSeparatorLine(this IAppSession session, char separator)
   {
-    await session.Print(SEPARATOR_LINE);
-    await session.PrintBlankLine();
-  }
-
-  public static async ValueTask PrintBlankLine(this IAppSession session, bool bordered = true)
-  {
-    if (bordered) await session.Print(new string(' ', LINE_LENGTH - (2 * INNER_MARGIN)).AddBorder());
-    else await session.Print(new string(' ', LINE_LENGTH - (2 * INNER_MARGIN)));
-  }
-
-  public static async ValueTask PrintBottomBorder(this IAppSession session)
-  {
-    await session.PrintBlankLine();
-    await session.Print(SEPARATOR_LINE);
+    await SendRaw(session, new string(' ', ((GameSession)session).LINE_LENGTH));
   }
 
   public async static Task<bool> VerifyCommandParams(this StringPackageInfo pkg, GameSession session, int expectedParamCount, bool exact = true, string customErrorMsg = null)
@@ -70,14 +58,14 @@ public static class TelnetHelpers
     {
       if (pkg.Parameters is not null && pkg.Parameters.Length != expectedParamCount)
       {
-        await session.Print(customErrorMsg ?? "Invalid Syntax - try again.");
+        await session.SendRaw(customErrorMsg ?? "Invalid Syntax - try again.\r\n");
         await session.CurrentView.Display();
         return false;
       }
     }
     if (pkg.Parameters is not null && pkg.Parameters.Length < expectedParamCount)
     {
-      await session.Print(customErrorMsg ?? "Invalid Syntax - try again.");
+      await session.SendRaw(customErrorMsg ?? "Invalid Syntax - try again.\r\n");
       await session.CurrentView.Display();
       return false;
     }

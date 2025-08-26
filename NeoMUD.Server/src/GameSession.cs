@@ -8,6 +8,12 @@ namespace NeoMUD.src;
 
 public class GameSession : AppSession
 {
+  
+  public readonly char SEPARATOR  = '#';
+  public readonly int LINE_LENGTH = 80;
+  public readonly int INNER_MARGIN  = 5;
+
+
   public User? User { get; set; }
   public Character? Character { get; set; }
 
