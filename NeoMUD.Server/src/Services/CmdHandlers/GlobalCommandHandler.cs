@@ -7,6 +7,6 @@ public static class GlobalCommandHandler
 {
     public static async Task PING(GameSession session)
     {
-      await session.Print("PONG");
+      await session.FormMessage("PONG").Send();
     }
 }

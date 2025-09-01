@@ -3,6 +3,7 @@ using NeoMUD.src.Models;
 using NeoMUD.src.Services;
 using NeoMUD.src.Services.Helpers;
 using SuperSocket.ProtoBase;
+using static NeoMUD.src.Services.Helpers.TelnetHelpers;
 
 namespace NeoMUD.src.Views;
 
@@ -13,17 +14,17 @@ public class CharPickView(GameSession session, CharacterService charSvc, ILogger
   public async Task Display()
   {
     await session.ClearScreen();
-    await session.PrintTopBorder();
-    await session.Printf("CHOOSE YOUR CHARACTER", TelnetTextExtensions.StringJustification.CENTER);
-    await session.PrintBlankLine();
-    await session.Printf("0-9 to select character    NEW to create new character", TelnetTextExtensions.StringJustification.CENTER);
+    await session.SendSeparatorLine(session.SEPARATOR);
+    await session.FormMessage("CHOOSE YOUR CHARACTER", StringJustification.CENTER).Send();
+    await session.SendSeparatorLine(' ');
+    await session.FormMessage("0-9 to select character    NEW to create new character", StringJustification.CENTER).Send();
     
     var cs = await charSvc.GetCharacters(session.User!.Id);
     Characters = cs.Index().ToList();
 
     foreach (var c in Characters)
     {
-      await session.Printf($"     {c.Index}) - {c.Character.CharacterName}", TelnetTextExtensions.StringJustification.LEFT, true);
+      await session.FormMessage($"     {c.Index}) - {c.Character.CharacterName}", StringJustification.LEFT).Send();
     }
   }
 
@@ -46,7 +47,7 @@ public class CharPickView(GameSession session, CharacterService charSvc, ILogger
       }
       catch (FormatException)
       {
-        await session.Print("Invalid selection");
+        await session.SendRaw("Invalid selection");
       }
     }
 

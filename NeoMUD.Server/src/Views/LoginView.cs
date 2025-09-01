@@ -10,7 +10,7 @@ public class LoginView(GameSession session, UserService userSvc, ILogger<LoginVi
 
   public async Task Display()
   {
-    await session.Print($"""
+    await session.SendRaw($"""
 ################################################################################
 ################################################################################
 ###  ######  ####          #####        ########################################
@@ -35,14 +35,14 @@ public class LoginView(GameSession session, UserService userSvc, ILogger<LoginVi
 # +++ === +++ === +++ === +++ === +++ ==== +++ === +++ === +++ === +++ === +++ #
 #                   LOGIN <username> <password> or REGISTER                    #
 # +++ === +++ === +++ === +++ === +++ ==== +++ === +++ === +++ === +++ === +++ #
-""");
+""", true);
   }
 
   public async Task LOGIN(StringPackageInfo pkg)
   {
     if (pkg.Parameters.Length != 2)
     {
-      await session.Print("Syntax: LOGIN <username> <password>");
+      await session.SendRaw("Syntax: LOGIN <username> <password>", true);
       return;
     }
 
@@ -53,7 +53,7 @@ public class LoginView(GameSession session, UserService userSvc, ILogger<LoginVi
 
     if (user is null)
     {
-      await session.Print("Username or password incorrect.");
+      await session.SendRaw("Username or password incorrect.", true);
       return;
     }
 
@@ -77,7 +77,7 @@ public class LoginView(GameSession session, UserService userSvc, ILogger<LoginVi
         REGISTER();
         break;
       default:
-        await session.Print("Invalid command - LOGIN or REGISTER");
+        await session.SendRaw("Invalid command - LOGIN or REGISTER", true);
         break;
     }
   }

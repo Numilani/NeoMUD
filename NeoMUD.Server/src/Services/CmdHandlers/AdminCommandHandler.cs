@@ -22,7 +22,7 @@ public class AdminCommandHandler(GameSession session, ILogger<AdminCommandHandle
     {
       foreach (var user in db.Users.ToList())
       {
-        await session.Print(user.Username);
+        await session.FormMessage(user.Username).Send();
       }
     }
 
@@ -30,7 +30,7 @@ public class AdminCommandHandler(GameSession session, ILogger<AdminCommandHandle
     {
       foreach (var room in db.Rooms.ToList())
       {
-        await session.Print($"{room.RoomName} ({room.Id})");
+        await session.FormMessage($"{room.RoomName} ({room.Id})").Send();
       }
     }
 

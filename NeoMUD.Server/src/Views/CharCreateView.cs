@@ -23,30 +23,30 @@ public class CharCreateView(GameSession session, CharacterService charSvc, ILogg
       case "requestName":
         await session.ClearScreen();
 
-        await session.PrintTopBorder();
-        await session.Printf($"NAME: ");
+        await session.SendSeparatorLine(session.SEPARATOR);
+        await session.SendRaw($"NAME: ");
         break;
       case "requestDescription":
         await session.ClearScreen();
 
-        await session.PrintTopBorder();
-        await session.Printf($"NAME: {name}");
-        await session.PrintBlankLine();
-        await session.Printf($"DESCRIPTION: ");
+        await session.SendSeparatorLine(session.SEPARATOR);
+        await session.SendRaw($"NAME: {name}", true);
+        await session.SendSeparatorLine(' ');
+        await session.SendRaw($"DESCRIPTION: ");
         break;
       case "finalize":
         await session.ClearScreen();
 
-        await session.PrintTopBorder();
-        await session.Printf($"NAME: {name}");
-        await session.PrintBlankLine();
-        await session.Printf($"DESCRIPTION: ");
-        await session.Printf($"             {description}");
-        await session.PrintBlankLine();
-        await session.Print(TelnetHelpers.SEPARATOR_LINE);
-        await session.PrintBlankLine();
-        await session.Printf("CONTINUE if this looks correct, RESTART if it doesn't, or EXIT to discard.");
-        await session.PrintBottomBorder();
+        await session.SendSeparatorLine(session.SEPARATOR);
+        await session.SendRaw($"NAME: {name}", true);
+        await session.SendSeparatorLine(' ');
+        await session.SendRaw($"DESCRIPTION: ", true);
+        await session.SendRaw($"             {description}", true);
+        await session.SendSeparatorLine(' ');
+        await session.SendSeparatorLine(session.SEPARATOR);
+        await session.SendSeparatorLine(' ');
+        await session.SendRaw("CONTINUE if this looks correct, RESTART if it doesn't, or EXIT to discard.", true);
+        await session.SendSeparatorLine(session.SEPARATOR);
         break;
     }
   }
@@ -83,7 +83,7 @@ public class CharCreateView(GameSession session, CharacterService charSvc, ILogg
             await session.CloseAsync();
             break;
           default:
-            await session.Print("CONTINUE, RESTART, or EXIT please.");
+            await session.SendRaw("CONTINUE, RESTART, or EXIT please.");
             break;
         }
         break;

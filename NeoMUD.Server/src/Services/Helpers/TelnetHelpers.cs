@@ -36,9 +36,24 @@ public static class TelnetHelpers
     return new TelnetMessage(s);
   }
 
-  public static async ValueTask SendRaw(this IAppSession session, string str)
+  public static TelnetMessage FormMessage(this GameSession s, string msg)
   {
-    await session.SendAsync(Encoding.UTF8.GetBytes(str));
+    var x = new TelnetMessage(s);
+    x.Add(msg);
+    return x;
+  }
+
+  public static TelnetMessage FormMessage(this GameSession s, string msg, StringJustification justification)
+  {
+    var x = new TelnetMessage(s);
+    x.Add(msg, -1, justification);
+    return x;
+  }
+
+  public static async ValueTask SendRaw(this IAppSession session, string str, bool terminate = false)
+  {
+    if (terminate) await session.SendAsync(Encoding.UTF8.GetBytes(str + "\r\n"));
+    else await session.SendAsync(Encoding.UTF8.GetBytes(str));
   }
 
   public async static ValueTask ClearScreen(this IAppSession session)
@@ -46,9 +61,9 @@ public static class TelnetHelpers
     await session.SendAsync(Encoding.UTF8.GetBytes("\x1b[2J"));
   }
 
-  public static async ValueTask SendSeparatorLine(this IAppSession session, char separator)
+  public static async ValueTask SendSeparatorLine(this IAppSession session, char separator, bool wrapped = true)
   {
-    await SendRaw(session, new string(' ', ((GameSession)session).LINE_LENGTH));
+    if (wrapped) await SendRaw(session, ((GameSession)session).SEPARATOR + new string(separator, ((GameSession)session).LINE_LENGTH - 2) + ((GameSession)session).SEPARATOR);
   }
 
   public async static Task<bool> VerifyCommandParams(this StringPackageInfo pkg, GameSession session, int expectedParamCount, bool exact = true, string customErrorMsg = null)

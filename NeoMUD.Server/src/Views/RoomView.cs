@@ -11,8 +11,8 @@ namespace NeoMUD.src.Views
         {
           var room = await roomSvc.GetRoom(session.Character!.CurrentRoomId ?? "00000000");
 
-          await session.Print(room.RoomName + "\n\n");
-          await session.Print(room.DefaultDescription);
+          await session.SendRaw(room.RoomName + "\n\n");
+          await session.SendRaw(room.DefaultDescription);
         }
 
         public Task ReceiveInput(StringPackageInfo pkg)

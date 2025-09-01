@@ -1,9 +1,8 @@
 using Microsoft.Extensions.Logging;
-using NeoMUD.src;
 using NeoMUD.src.Services;
 using NeoMUD.src.Services.Helpers;
-using Serilog;
 using SuperSocket.ProtoBase;
+using static NeoMUD.src.Services.Helpers.TelnetHelpers;
 
 namespace NeoMUD.src.Views;
 
@@ -23,28 +22,28 @@ public class RegisterView(GameSession session, UserService userSvc, ILogger<Regi
     {
       case "requestUsername":
         await session.ClearScreen();
-        await session.PrintTopBorder();
-        await session.Printf("Enter a new username: ");
+        await session.SendSeparatorLine(session.SEPARATOR);
+        await session.SendRaw("Enter a new username: ");
         break;
       case "requestPassword":
         await session.ClearScreen();
-        await session.PrintTopBorder();
-        await session.Printf($"USERNAME: {Username}");
-        await session.PrintBlankLine();
-        await session.Print($"Enter a password: ");
+        await session.SendSeparatorLine(session.SEPARATOR);
+        await session.SendRaw($"USERNAME: {Username}", true);
+        await session.SendSeparatorLine(' ');
+        await session.SendRaw($"Enter a password: ");
         break;
       case "verifyPassword":
-        await session.Printf($"Verify your password:");
+        await session.SendRaw($"Verify your password:");
         break;
       case "requestEmail":
         await session.ClearScreen();
-        await session.Printf("(Optional) Enter an email address, in case you forget your password. Enter 'NONE' to skip.");
+        await session.SendRaw("(Optional) Enter an email address, in case you forget your password. Enter 'NONE' to skip.");
         break;
       case "finalize":
         await session.ClearScreen();
-        await session.Printf("SUCCESS!", TelnetTextExtensions.StringJustification.CENTER);
-        await session.Printf("New account created with username '{Username}' and email '{Email}'.", TelnetTextExtensions.StringJustification.CENTER);
-        await session.Printf("Type CONTINUE to log in, or EXIT to exit.", TelnetTextExtensions.StringJustification.CENTER);
+        await session.FormMessage("SUCCESS!", StringJustification.CENTER).Send();
+        await session.FormMessage("New account created with username '{Username}' and email '{Email}'.", StringJustification.CENTER).Send();
+        await session.FormMessage("Type CONTINUE to log in, or EXIT to exit.", StringJustification.CENTER).Send();
         break;
     }
   }
@@ -74,7 +73,7 @@ public class RegisterView(GameSession session, UserService userSvc, ILogger<Regi
         {
           if (Password != pkg.Key)
           {
-            await session.Print("Passwords do not match.");
+            await session.SendRaw("Passwords do not match.", true);
             CurrentState = "requestUsername";
             await Display();
           }
@@ -98,7 +97,7 @@ public class RegisterView(GameSession session, UserService userSvc, ILogger<Regi
           catch (Exception e)
           {
             logger.LogWarning(e, "Couldn't create user");
-            await session.Print("Couldn't create your new user at this time - try again later.");
+            await session.SendRaw("Couldn't create your new user at this time - try again later.", true);
             CurrentState = "requestUsername";
             await Display();
           }
@@ -109,7 +108,7 @@ public class RegisterView(GameSession session, UserService userSvc, ILogger<Regi
         {
           var user = userSvc.AttemptSignin(Username, Password);
           if (user is null){
-            await session.Print("Couldn't log you in - try again later?");
+            await session.SendRaw("Couldn't log you in - try again later?", true);
             session.CloseAsync();
           }
           session.User = user;
@@ -117,12 +116,12 @@ public class RegisterView(GameSession session, UserService userSvc, ILogger<Regi
         }
         else if (pkg.Key.ToUpper() == "EXIT")
         {
-          await session.Print($"Goodbye, {Username}!");
+          await session.SendRaw($"Goodbye, {Username}!");
           await session.CloseAsync();
         }
         else
         {
-          await session.Print("CONTINUE or EXIT, please.");
+          await session.SendRaw("CONTINUE or EXIT, please.", true);
         }
         break;
     }
