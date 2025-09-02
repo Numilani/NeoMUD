@@ -7,7 +7,7 @@ using static NeoMUD.src.Services.Helpers.TelnetHelpers;
 
 namespace NeoMUD.src.Views;
 
-public class CharPickView(GameSession session, CharacterService charSvc, ILogger<CharPickView> logger) : IView
+public class CharPickView(IGameSession session, CharacterService charSvc, ILogger<CharPickView> logger) : IView
 {
   private List<(int Index, Character Character)> Characters { get; set; }
 

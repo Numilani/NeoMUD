@@ -6,7 +6,7 @@ using static NeoMUD.src.Services.Helpers.TelnetHelpers;
 
 namespace NeoMUD.src.Views;
 
-public class RegisterView(GameSession session, UserService userSvc, ILogger<RegisterView> logger) : IView
+public class RegisterView(IGameSession session, UserService userSvc, ILogger<RegisterView> logger) : IView
 {
   private string[] States { get; set; } = ["requestUsername", "requestPassword", "verifyPassword", "requestEmail", "finalize"];
   public string CurrentState { get; set; } = "requestUsername";
@@ -109,7 +109,7 @@ public class RegisterView(GameSession session, UserService userSvc, ILogger<Regi
           var user = userSvc.AttemptSignin(Username, Password);
           if (user is null){
             await session.SendRaw("Couldn't log you in - try again later?", true);
-            session.CloseAsync();
+            session.CloseAsync(SuperSocket.Connection.CloseReason.ApplicationError);
           }
           session.User = user;
           session.UpdateView(typeof(CharPickView));
@@ -117,7 +117,7 @@ public class RegisterView(GameSession session, UserService userSvc, ILogger<Regi
         else if (pkg.Key.ToUpper() == "EXIT")
         {
           await session.SendRaw($"Goodbye, {Username}!");
-          await session.CloseAsync();
+          await session.CloseAsync(SuperSocket.Connection.CloseReason.RemoteClosing);
         }
         else
         {

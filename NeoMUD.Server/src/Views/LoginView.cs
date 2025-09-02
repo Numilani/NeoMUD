@@ -5,7 +5,7 @@ using SuperSocket.ProtoBase;
 
 namespace NeoMUD.src.Views;
 
-public class LoginView(GameSession session, UserService userSvc, ILogger<LoginView> logger) : IView
+public class LoginView(IGameSession session, UserService userSvc, ILogger<LoginView> logger) : IView
 {
 
   public async Task Display()

@@ -1,4 +1,4 @@
-﻿using Serilog;
+using Serilog;
 using Quartz;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;

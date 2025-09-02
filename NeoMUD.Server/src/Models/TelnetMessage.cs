@@ -6,11 +6,11 @@ namespace NeoMUD.src.Models;
 
 public class TelnetMessage
 {
-  private GameSession Session { get; set; }
+  private IGameSession Session { get; set; }
 
   public List<string> TextLines { get; set; } = new();
 
-  public TelnetMessage(GameSession s)
+  public TelnetMessage(IGameSession s)
   {
     Session = s;
   }

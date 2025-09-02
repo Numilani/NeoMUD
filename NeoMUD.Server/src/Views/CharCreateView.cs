@@ -6,7 +6,7 @@ using SuperSocket.ProtoBase;
 
 namespace NeoMUD.src.Views;
 
-public class CharCreateView(GameSession session, CharacterService charSvc, ILogger<CharCreateView> logger) : IView
+public class CharCreateView(IGameSession session, CharacterService charSvc, ILogger<CharCreateView> logger) : IView
 {
 
   private string[] States { get; set; } = ["requestName", "requestDescription", "finalize"];
@@ -80,7 +80,7 @@ public class CharCreateView(GameSession session, CharacterService charSvc, ILogg
             await Display();
             break;
           case "EXIT":
-            await session.CloseAsync();
+            await session.CloseAsync(SuperSocket.Connection.CloseReason.RemoteClosing);
             break;
           default:
             await session.SendRaw("CONTINUE, RESTART, or EXIT please.");

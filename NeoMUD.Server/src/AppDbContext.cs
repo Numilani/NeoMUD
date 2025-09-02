@@ -13,9 +13,9 @@ public class AppDbContext : DbContext
   {
   }
 
-  public DbSet<User> Users { get; set; } = default!;
-  public DbSet<Character> Characters { get; set; } = default!;
-  public DbSet<Room> Rooms { get; set; } = default!;
+  public virtual DbSet<User> Users { get; set; } = default!;
+  public virtual DbSet<Character> Characters { get; set; } = default!;
+  public virtual DbSet<Room> Rooms { get; set; } = default!;
 
   protected override void OnConfiguring(DbContextOptionsBuilder builder)
   {

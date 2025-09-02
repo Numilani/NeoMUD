@@ -6,9 +6,9 @@ namespace NeoMUD.src.Services;
 
 public class IViewFactory(UserService UserSvc, CharacterService CharSvc, RoomService RoomSvc, ILoggerFactory _logFactory)
 {
-  private GameSession Session;
+  private IGameSession Session;
 
-    public void Init(GameSession s){
+    public void Init(IGameSession s){
     Session = s;
   }
 

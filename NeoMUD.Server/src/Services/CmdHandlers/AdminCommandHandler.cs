@@ -4,7 +4,7 @@ using SuperSocket.ProtoBase;
 
 namespace NeoMUD.src.Services;
 
-public class AdminCommandHandler(GameSession session, ILogger<AdminCommandHandler> logger, AppDbContext db)
+public class AdminCommandHandler(IGameSession session, ILogger<AdminCommandHandler> logger, AppDbContext db)
 {
     public async Task ReceiveInput(StringPackageInfo pkg)
     {

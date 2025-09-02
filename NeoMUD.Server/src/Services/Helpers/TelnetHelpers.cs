@@ -31,19 +31,19 @@ public static class TelnetHelpers
 {"<UNDERLINE>", "\x1b[4m"}
 };
 
-  public static TelnetMessage FormMessage(this GameSession s)
+  public static TelnetMessage FormMessage(this IGameSession s)
   {
     return new TelnetMessage(s);
   }
 
-  public static TelnetMessage FormMessage(this GameSession s, string msg)
+  public static TelnetMessage FormMessage(this IGameSession s, string msg)
   {
     var x = new TelnetMessage(s);
     x.Add(msg);
     return x;
   }
 
-  public static TelnetMessage FormMessage(this GameSession s, string msg, StringJustification justification)
+  public static TelnetMessage FormMessage(this IGameSession s, string msg, StringJustification justification)
   {
     var x = new TelnetMessage(s);
     x.Add(msg, -1, justification);
@@ -63,10 +63,10 @@ public static class TelnetHelpers
 
   public static async ValueTask SendSeparatorLine(this IAppSession session, char separator, bool wrapped = true)
   {
-    if (wrapped) await SendRaw(session, ((GameSession)session).SEPARATOR + new string(separator, ((GameSession)session).LINE_LENGTH - 2) + ((GameSession)session).SEPARATOR);
+    if (wrapped) await SendRaw(session, ((IGameSession)session).SEPARATOR + new string(separator, ((IGameSession)session).LINE_LENGTH - 2) + ((IGameSession)session).SEPARATOR);
   }
 
-  public async static Task<bool> VerifyCommandParams(this StringPackageInfo pkg, GameSession session, int expectedParamCount, bool exact = true, string customErrorMsg = null)
+  public async static Task<bool> VerifyCommandParams(this StringPackageInfo pkg, IGameSession session, int expectedParamCount, bool exact = true, string customErrorMsg = null)
   {
     if (pkg.Parameters is null && expectedParamCount == 0) return true;
     if (exact)
